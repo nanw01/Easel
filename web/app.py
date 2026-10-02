@@ -411,7 +411,7 @@ for _spec in SKILL_API_REQUIREMENTS.values():
             _ENV_ALLOWLIST.add(_key["env"])
             _ENV_ALLOWLIST.update(_key.get("aliases", []))
 
-ENV_FILE = PROJECT_ROOT / ".env"
+ENV_FILE = (PROJECT_ROOT / ".env").resolve()
 _PLACEHOLDER_RE = re.compile(r"replace_me|your[-_]?api[-_]?key|xxx|^\.{3}$|^<.*>$", re.I)
 
 TEXT_EXTS = {".txt", ".md", ".json", ".csv", ".log", ".py", ".js", ".ts", ".html", ".htm", ".css", ".xml", ".yaml", ".yml", ".srt", ".vtt"}
@@ -820,6 +820,7 @@ def _write_env(updates: dict[str, str]) -> None:
         out.extend(appended)
     tmp = ENV_FILE.with_suffix('.env.tmp')
     tmp.write_text('\n'.join(out) + '\n', encoding='utf-8')
+    tmp.chmod(0o600)
     tmp.replace(ENV_FILE)
 
 
@@ -1440,6 +1441,7 @@ def _write_env_direct(updates: dict[str, str]) -> None:
         out.extend(appended)
     tmp = ENV_FILE.with_suffix('.env.tmp')
     tmp.write_text('\n'.join(out) + '\n', encoding='utf-8')
+    tmp.chmod(0o600)
     tmp.replace(ENV_FILE)
 
 

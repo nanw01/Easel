@@ -1,0 +1,26 @@
+services:
+  easel:
+    build: .
+    image: nanlab/easel:container-v1
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:7860:7860"
+    volumes:
+      - easel_home:/home/easel
+      - easel_outputs:/app/outputs
+      - easel_assets:/app/assets
+      - easel_profiles:/app/profiles
+    shm_size: 1gb
+    mem_limit: 6g
+    cpus: 2
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+volumes:
+  easel_home:
+  easel_outputs:
+  easel_assets:
+  easel_profiles:

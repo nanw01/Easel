@@ -43,6 +43,11 @@ Git instead of importing an existing unmanaged container. Media dependencies are
 cached separately from UI/application files; temporary Rust toolchains are removed
 from the final image.
 
+Under Advanced, set Compose deployment to **Raw (deploy file as-is)**. Coolify
+4.3.23's managed parser rewrites named volume references, including external ones.
+Raw mode preserves the exact external volume names and the explicit Traefik route
+in this file, while Coolify still builds from Git and manages the application.
+
 Before the first deployment, run `python3 docker/init_domain.py` on nanlab. This
 creates a protected Caddy configuration and a random login in `docker/data/`.
 Never commit these generated files. The four existing volumes are declared external
@@ -50,10 +55,11 @@ by their exact Docker names, so the prior configuration and content remain avail
 Stop the unmanaged Easel container before starting the Coolify application; both
 must never use the same OpenClaw state concurrently.
 
-Only the `gateway` service receives the domain. Configure its internal port as 8080.
-With the current nanlab Cloudflare Tunnel (HTTPS at the edge, HTTP to Traefik), set
-Coolify's gateway domain to `http://easel.nanlab.xyz:8080` and browse
-`https://easel.nanlab.xyz`. The Easel service itself has no public domain.
+Only the `gateway` service receives public traffic, on internal port 8080.
+With the current nanlab Cloudflare Tunnel (HTTPS at the edge, HTTP to Traefik),
+the Compose labels route `easel.nanlab.xyz` over HTTP internally; browse
+`https://easel.nanlab.xyz`. Raw mode uses these repository labels for routing.
+The Easel service itself has no public router.
 Caddy requires authentication for every application/API request and removes the
 login header before proxying. Its private 8081 health endpoint serves only `ok`.
 The server-side login file is `docker/data/domain-login.txt` (0600).

@@ -10,7 +10,7 @@ services:
     ports:
       - "127.0.0.1:7860:7860"
     labels:
-      traefik.enable: "false"
+      - traefik.enable=false
     networks:
       - private
     volumes:
@@ -35,6 +35,14 @@ services:
         condition: service_healthy
     expose:
       - "8080"
+    # Raw Compose preserves external volumes; declare the proxy route explicitly.
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=coolify
+      - traefik.http.routers.easel-nanlab.entrypoints=http
+      - traefik.http.routers.easel-nanlab.rule=Host(`easel.nanlab.xyz`)
+      - traefik.http.routers.easel-nanlab.service=easel-nanlab
+      - traefik.http.services.easel-nanlab.loadbalancer.server.port=8080
     networks:
       - private
       - proxy

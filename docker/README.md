@@ -34,3 +34,30 @@ The application's Host/Origin guard is not user authentication.
 
 The image does not bundle API credits or configure a default paid model. Video/model
 end-to-end acceptance requires credentials supplied by the user.
+
+## Git-based Coolify installation on nanlab
+
+Use https://github.com/nanw01/Easel, branch `container-nanlab`, Docker Compose build
+pack, base `/`, Compose location `/compose.coolify.yaml`. This builds Easel from
+Git instead of importing an existing unmanaged container. Media dependencies are
+cached separately from UI/application files; temporary Rust toolchains are removed
+from the final image.
+
+Before the first deployment, run `python3 docker/init_domain.py` on nanlab. This
+creates a protected Caddy configuration and a random login in `docker/data/`.
+Never commit these generated files. The four existing volumes are declared external
+by their exact Docker names, so the prior configuration and content remain available.
+Stop the unmanaged Easel container before starting the Coolify application; both
+must never use the same OpenClaw state concurrently.
+
+Only the `gateway` service receives the domain. Configure its internal port as 8080.
+With the current nanlab Cloudflare Tunnel (HTTPS at the edge, HTTP to Traefik), set
+Coolify's gateway domain to `http://easel.nanlab.xyz:8080` and browse
+`https://easel.nanlab.xyz`. The Easel service itself has no public domain.
+Caddy requires authentication for every application/API request and removes the
+login header before proxying. Its private 8081 health endpoint serves only `ok`.
+The server-side login file is `docker/data/domain-login.txt` (0600).
+
+Coolify is the owner of the Git-based deployment after migration. Do not run the
+original Compose `up` while the Coolify application is active. A rollback stops
+Coolify first, then starts the original Compose file with the preserved volumes.

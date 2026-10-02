@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+umask 077
 cd /app
 mkdir -p outputs assets profiles /home/easel/.openclaw-easel
 # Copy the reusable template only when the mounted profile directory is empty.
@@ -19,7 +20,7 @@ trap cleanup EXIT
 trap 'exit 0' TERM INT
 for attempt in $(seq 1 90); do
     kill -0 "$gateway_pid" || exit 1
-    if curl -fsS "http://127.0.0.1:${EASEL_GATEWAY_PORT}/healthz" >/dev/null; then break; fi
+    if curl -fsS "http://127.0.0.1:${EASEL_GATEWAY_PORT}/healthz" >/dev/null 2>&1; then break; fi
     sleep 1
 done
 curl -fsS "http://127.0.0.1:${EASEL_GATEWAY_PORT}/healthz" >/dev/null

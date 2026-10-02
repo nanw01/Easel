@@ -18,16 +18,20 @@ RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
  && npm install -g openclaw@${OPENCLAW_VERSION} \
  && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-COPY . .
-COPY --from=frontend /build/dist /app/web/frontend/dist
+# Keep media dependency builds cached when application/frontend files change.
+COPY pyproject.toml ./
+COPY easel/ ./easel/
 RUN python -m venv /app/.venv \
  && pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision \
- && pip install -e . \
+ && CARGO_PROFILE_RELEASE_LTO=false CARGO_PROFILE_RELEASE_CODEGEN_UNITS=16 pip install -e . \
  && python -m playwright install --with-deps chromium \
- && cp -a profiles/_template /opt/easel-profile-template \
  && useradd --create-home --uid 1000 easel \
- && chown -R easel:easel /app /opt/playwright
-RUN mkdir -p /app/outputs /app/assets /app/profiles \
+ && chown -R easel:easel /app /opt/playwright \
+ && rm -rf /root/.cache /root/.cargo /root/.rustup /tmp/pip-* /var/lib/apt/lists/*
+COPY --chown=1000:1000 . .
+COPY --chown=1000:1000 --from=frontend /build/dist /app/web/frontend/dist
+RUN cp -a profiles/_template /opt/easel-profile-template \
+ && mkdir -p /app/outputs /app/assets /app/profiles \
  && chown easel:easel /app/outputs /app/assets /app/profiles
 USER easel
 EXPOSE 7860

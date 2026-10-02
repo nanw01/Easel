@@ -1,0 +1,71 @@
+# Git-based Coolify application on nanlab. Existing data volumes are reused.
+services:
+  easel:
+    build: .
+    image: nanlab/easel:coolify-v1
+    restart: unless-stopped
+    environment:
+      EASEL_EXTRA_HOSTS: easel.nanlab.xyz
+      EASEL_EXTRA_ORIGINS: https://easel.nanlab.xyz
+    ports:
+      - "127.0.0.1:7860:7860"
+    labels:
+      traefik.enable: "false"
+    networks:
+      - private
+    volumes:
+      - easel_home:/home/easel
+      - easel_outputs:/app/outputs
+      - easel_assets:/app/assets
+      - easel_profiles:/app/profiles
+    shm_size: 1gb
+    mem_limit: 6g
+    cpus: 2
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+  gateway:
+    image: caddy:2-alpine@sha256:6aeddd44c3078b0f9a35206472a11420648a79c184603ef95957d0a20044cb2b
+    restart: unless-stopped
+    depends_on:
+      easel:
+        condition: service_healthy
+    expose:
+      - "8080"
+    networks:
+      - private
+      - proxy
+    volumes:
+      - /home/nan/apps/easel/docker/data/Caddyfile:/etc/caddy/Caddyfile:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8081/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    mem_limit: 256m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+networks:
+  private:
+  proxy:
+    external: true
+    name: coolify
+volumes:
+  easel_home:
+    external: true
+    name: easel_easel_home
+  easel_outputs:
+    external: true
+    name: easel_easel_outputs
+  easel_assets:
+    external: true
+    name: easel_easel_assets
+  easel_profiles:
+    external: true
+    name: easel_easel_profiles

@@ -412,3 +412,7 @@ Easel 的技能体系和工作流受益于许多优秀的开源项目、工具�
     <img src="https://api.star-history.com/svg?repos=ZJU-REAL/Easel&type=Date" width="720" alt="Easel Star History Chart">
   </a>
 </p>
+
+## 容器部署
+
+Docker Compose 安装、私人访问、数据卷及 Coolify 配置见 [容器部署说明](docker/README.md)。

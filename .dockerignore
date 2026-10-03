@@ -1,0 +1,14 @@
+.git
+.venv
+.env*
+**/node_modules
+**/__pycache__
+**/.pytest_cache
+outputs
+profiles/*
+!profiles/_template
+assets
+!assets/icon*.png
+!assets/.gitkeep
+docker/data
+*.log

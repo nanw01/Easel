@@ -42,6 +42,11 @@ services:
       - traefik.http.routers.easel-nanlab.entrypoints=http
       - traefik.http.routers.easel-nanlab.rule=Host(`easel.nanlab.xyz`)
       - traefik.http.routers.easel-nanlab.service=easel-nanlab
+      # Cloudflare Tunnel forwards HTTPS traffic to Traefik's HTTPS entrypoint.
+      - traefik.http.routers.easel-nanlab-https.entrypoints=https
+      - traefik.http.routers.easel-nanlab-https.rule=Host(`easel.nanlab.xyz`)
+      - traefik.http.routers.easel-nanlab-https.service=easel-nanlab
+      - traefik.http.routers.easel-nanlab-https.tls=true
       - traefik.http.services.easel-nanlab.loadbalancer.server.port=8080
     networks:
       - private
